@@ -6,14 +6,14 @@ const User = db.user;
 verifyToken = (req, res, next) => {
     let token = req.headers['x-access-token'];
 
-    if(!token) {
+    if (!token) {
         return res.status(403).send({
             message: 'No token provided!'
         });
     }
 
     jwt.verify(token, config.secret, (err, decoded) => {
-        if(err) {
+        if (err) {
             return res.status(401).send({
                 message: 'Unauthorized!'
             });
@@ -23,12 +23,65 @@ verifyToken = (req, res, next) => {
     })
 }
 
+isAdmin = (req, res, next) => {
+    User.findByPk(req.userId).then(user => {
+        user.getRoles().then(roles => {
+            for (let i = 0; i < roles.length; i++) {
+                if (roles[i].name === 'ROLE_ADMIN') {
+                    next();
+                    return;
+                }
+            }
+
+            res.status(403).send({
+                message: 'Require Admin Role!'
+            });
+        });
+    });
+};
+
+isAgent = (req, res, next) => {
+    User.findByPk(req.userId).then(user => {
+        user.getRoles().then(roles => {
+            for (let i = 0; i < roles.length; i++) {
+                if (roles[i].name === 'ROLE_AGENT') {
+                    next();
+                    return;
+                }
+            }
+
+            res.status(403).send({
+                message: 'Require AGENT Role!'
+            });
+        });
+    });
+};
+
+
+isAgentOrAdmin = (req, res, next) => {
+    User.findByPk(req.userId).then(user => {
+        user.getRoles().then(roles => {
+            for (let i = 0; i < roles.length; i++) {
+                if (roles[i].name === 'ROLE_AGENT') {
+                    next();
+                    return;
+                }
+                if (roles[i].name === 'ROLE_ADMIN') {
+                    next();
+                    return;
+                }
+            }
+
+            res.status(403).send({
+                message: 'Require AGENT Role!'
+            });
+        });
+    });
+};
+
 const authJwt = {
     verifyToken: verifyToken,
 }
 
-// isAdmin = (req, res, next) => {
-//     User.findByPk(req.userId).then(user => {
-//
-//     })
-// }
+module.exports = authJwt;
+

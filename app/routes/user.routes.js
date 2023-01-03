@@ -1,4 +1,4 @@
-const { authJwt } = require('../middleware/authJwt');
+const { authJwt } = require('./../middleware/authJwt');
 const controller = require('../controllers/user.controller');
 
 module.exports = function (app) {
@@ -11,12 +11,14 @@ module.exports = function (app) {
         response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
         next();
     });
+
+    app.get('/user/test/all', controller.allAccess);
+
+    app.get('/user/test/user', [], controller.userBoard);
+
+    app.get('/user/test/user', [], controller.moderatorBoard);
+
+    app.get('/user/test/user', [], controller.adminBoard);
 }
 
-app.get('/user/test/all',controller.allAccess);
 
-app.get('/user/test/user', [authJwt.verifyToken], controller.userBoard);
-
-// app.get('/user/test/user', [authJwt.verifyToken, authJwt.isModerator], controller.moderatorBoard);
-
-// app.get('/user/test/user', [authJwt.verifyToken, authJwt.isAdmin], controller.adminBoard);

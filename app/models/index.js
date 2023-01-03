@@ -1,6 +1,8 @@
+"use strict";
 const config = require('../config/db.config.js');
 
-const Sequelize = require('sequelize');
+const { Sequelize } = require('sequelize');
+
 const sequelize = new Sequelize(
     config.DB,
     config.USER,
@@ -9,7 +11,6 @@ const sequelize = new Sequelize(
         host: config.HOST,
         port: config.PORT,
         dialect: config.dialect,
-        operatorsAliases: false,
         pool: {
             max: config.pool.max,
             min: config.pool.min,
@@ -22,7 +23,7 @@ const sequelize = new Sequelize(
 const db = {};
 
 db.Sequelize = Sequelize;
-db.sequelize = Sequelize;
+db.sequelize = sequelize;
 
 db.user = require('../models/user.model.js')(sequelize, Sequelize);
 db.role = require('../models/role.model.js')(sequelize, Sequelize);
@@ -40,5 +41,6 @@ db.user.belongsToMany(db.role, {
 });
 
 db.role = ['ROLE_USER','ROLE_AGENT','ROLE_ADMIN'];
+
 
 module.exports = db;

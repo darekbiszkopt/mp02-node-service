@@ -1,4 +1,4 @@
-const { verifySignUp } = require('../middleware/verifySignUp');
+const {verifySignUp} = require('../middleware/verifySignUp');
 const controller = require('../controllers/auth.controller');
 
 module.exports = function (app) {
@@ -11,10 +11,11 @@ module.exports = function (app) {
         response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
         next();
     });
+
+    console.log('XdD')
+    // REGISTER
+    app.post('/auth/sign-up', [], controller.signup);
+
+    // SIGN IN
+    app.post('/auth/sign-in', controller.signin);
 }
-
-// REGISTER
-app.post('/auth/sign-up', [verifySignUp.checkDuplicateUsernameOrEmail, verifySignUp.checkRolesExisted], controller.signup);
-
-// SIGN IN
-app.post('/auth/sign-in',controller.signin);

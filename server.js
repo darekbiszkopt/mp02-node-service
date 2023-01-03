@@ -20,7 +20,7 @@ app.use(function (req, response, next) {
     next();
 });
 
-const db = require('.app/models');
+const db = require('./app/models');
 const Role = db.role;
 
 db.sequelize.sync({force: true}).then(() => {

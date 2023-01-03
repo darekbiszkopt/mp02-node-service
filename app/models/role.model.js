@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize) => {
-    return sequelize.define('users', {
+    return sequelize.define('user', {
         username: {
-            type: Sequelize.INT,
+            type: Sequelize.STRING,
             primaryKey: true
         },
         name: {
