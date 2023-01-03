@@ -1,54 +1,55 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+createError = require('http-errors');
+express = require('express');
+path = require('path');
+cookieParser = require('cookie-parser');
+logger = require('morgan');
+expressValidator = require('express-validator');
+flash = require('express-flash');
+session = require('express-session');
+bodyParser = require('body-parser');
+auth = require('./app/config/auth.config');
 
-const app = express();
+clientsRouter = require('./app/routes/client.js');
+// var customersRouter = require('./app/routes/customers');
 
-var corsOptions = {origin: 'http://localhost:5001'};
+app = express();
 
-app.use(cors(corsOptions))
-app.use(bodyParser.json())
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+app.use(logger('dev'));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(function (req, response, next) {
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    response.setHeader("Access-Control-Allow-Credentials", "true");
-    response.setHeader("Access-Control-Max-Age", 600);
-    response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-    response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
-    next();
+app.use(session({
+        secret: auth.secret,
+        saveUninitialized: true,
+        cookie: {maxAge: 60000}
+    })
+)
+
+app.use(flash());
+app.use(expressValidator());
+
+app.use('/client', clientsRouter);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    next(createError(404));
 });
 
-const db = require('./app/models');
-const Role = db.role;
-
-db.sequelize.sync({force: true}).then(() => {
-    console.log('Drop and Resync Database with { force: true }')
-    initial();
-})
-
-// simple route
-app.get('/', (req, res) => res.json({message: 'Welcome to Server Application'}));
-
-// routes
-require('./app/routes/auth.routes')(app);
-require('./app/routes/user.routes')(app);
-
-const PORT = 5001;
-app.listen(PORT, () => console.log(`Server running on port: http://localhost:${PORT}`))
-
-function initial() {
-    Role.create({
-        id: 1,
-        name: 'ROLE_USER'
-    });
-    Role.create({
-        id: 2,
-        name: 'ROLE_AGENT'
-    });
-    Role.create({
-        id: 3,
-        name: 'ROLE_ADMIN'
-    });
-}
+// error handler
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+});
+// port must be set to 3000 because incoming http requests are routed from port 80 to port 8080
+app.listen(5001, () => console.log(`Server running on port: http://localhost:5001`))
+module.exports = app;
